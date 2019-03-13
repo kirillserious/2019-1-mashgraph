@@ -1,3 +1,11 @@
+#version 330 core
+
+out vec4 fragColor;
+
+uniform vec2  iResolution;
+uniform float iTime;
+uniform vec2  iMouse;
+
 ///////////////////////////////////////////////////////////////
 ///                                                         ///
 ///                   Важные константы                      ///
@@ -431,7 +439,7 @@ getStart (float x,
 }
 
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void main()
 {
     ////////////////////////////////////////////////////////////
 	///                                                      ///
@@ -490,7 +498,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 	///                                                      ///
 	////////////////////////////////////////////////////////////
     
-    StartRays start = getStart(fragCoord.x, fragCoord.y, iResolution.x, iResolution.y);
+    StartRays start = getStart(gl_FragCoord.x, gl_FragCoord.y, iResolution.x, iResolution.y);
     vec3 ray_point = start.point;
     vec3 ray_dir   = start.dir;
     vec3 eye_point = start.eye_point;

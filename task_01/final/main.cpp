@@ -7,6 +7,7 @@
 #include "shader.h"
 
 int screen_width, screen_height;
+float mouse_x, mouse_y;
 
 void
 key_callback(GLFWwindow *window,
@@ -31,6 +32,12 @@ window_resize_callback (GLFWwindow* window,
         glViewport(0, 0, screen_width, screen_height);
 }
 
+void
+cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+        mouse_x = xpos;
+        mouse_y = screen_width - ypos;
+}
 
 GLuint
 get_vertex_array_object (void) {
@@ -85,7 +92,7 @@ main(int argc, char** argv)
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 
-        GLFWwindow *window = glfwCreateWindow(800, 600, "Mashgraph 1.", nullptr, nullptr);
+        GLFWwindow *window = glfwCreateWindow(800, 600, "Mashgraph 1", nullptr, nullptr);
         if (window == nullptr) {
                 std::cout << "Failed to create GLFW window" << std::endl;
                 glfwTerminate();
@@ -111,6 +118,7 @@ main(int argc, char** argv)
         /* Обработчики событий */
         glfwSetKeyCallback        (window, key_callback);
         glfwSetWindowSizeCallback (window, window_resize_callback);
+        glfwSetCursorPosCallback(window, cursor_position_callback);
         
         /* Игровой цикл */
         while(!glfwWindowShouldClose(window)) {
@@ -118,9 +126,7 @@ main(int argc, char** argv)
 
                 myShader.set_uniform("iResolution", screen_width, screen_height);
                 myShader.set_uniform("iTime", glfwGetTime());
-                double xpos, ypos;
-                glfwGetCursorPos(window, &xpos, &ypos);
-                myShader.set_uniform("iMouse", xpos, ypos);
+                myShader.set_uniform("iMouse", mouse_x, mouse_y);
                 myShader.use();
 
                 glBindVertexArray(VAO);

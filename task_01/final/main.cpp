@@ -7,7 +7,7 @@
 #include "shader.h"
 
 int screen_width, screen_height;
-float mouse_x, mouse_y;
+
 GLfloat rotation_x_matrix[] = {
         1.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f,
@@ -51,6 +51,7 @@ cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         float y_hypotenuse = sqrt(x*x + eye_dist*eye_dist);
         float y_cos = eye_dist / y_hypotenuse;;
         float y_sin = - x / y_hypotenuse;
+        
         rotation_y_matrix[0] =  y_cos;
         rotation_y_matrix[2] =  y_sin;
         rotation_y_matrix[6] = -y_sin;
@@ -151,9 +152,9 @@ main(int argc, char** argv)
         while(!glfwWindowShouldClose(window)) {
                 glfwPollEvents();
 
+                /* Передача параметров */
                 myShader.set_uniform("iResolution", screen_width, screen_height);
                 myShader.set_uniform("iTime", glfwGetTime());
-                myShader.set_uniform("iMouse", mouse_x, mouse_y);
                 myShader.set_uniform_matrix("rotation_x_matrix", rotation_x_matrix, 3);
                 myShader.set_uniform_matrix("rotation_y_matrix", rotation_y_matrix, 3);
                 myShader.use();

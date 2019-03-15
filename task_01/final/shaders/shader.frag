@@ -4,7 +4,6 @@ out vec4 fragColor;
 
 uniform vec2  iResolution;
 uniform float iTime;
-uniform vec2  iMouse;
 
 uniform mat3  rotation_x_matrix;
 uniform mat3  rotation_y_matrix;
@@ -367,40 +366,6 @@ float getBackgroundColor(vec2 coord)
 ///                                                         ///
 ///////////////////////////////////////////////////////////////
 
-/* Матрицы поворота */
-struct Rotate
-{
-	mat3 x;
-    mat3 y;
-};
-
-Rotate
-getRotate (float x, float y, float eye_dist)
-{
-	float y_hypotenuse = sqrt(x*x + eye_dist*eye_dist);
-    float y_cos = eye_dist / y_hypotenuse;;
-    float y_sin = - x / y_hypotenuse;
-    mat3  y_mat = mat3(1.);
-    y_mat[0][0] =  y_cos;
-    y_mat[0][2] =  y_sin;
-    y_mat[2][0] = -y_sin;
-    y_mat[2][2] =  y_cos;
-    
-    float x_hypotenuse = sqrt(y*y + eye_dist*eye_dist);
-    float x_cos = eye_dist / x_hypotenuse;;
-    float x_sin = y / x_hypotenuse;
-    mat3  x_mat = mat3(1.);
-    x_mat[1][1] =  x_cos;
-    x_mat[2][1] =  x_sin;
-    x_mat[1][2] = -x_sin;
-    x_mat[2][2] =  x_cos;
-    
-    Rotate result;
-    result.x = x_mat;
-    result.y = y_mat;
-    return result;
-}
-
 /* Направление первых лучей */
 struct StartRays
 {
@@ -415,7 +380,7 @@ getStart (float x,
           float screen_width,
           float screen_height)
 {
-	StartRays start;
+    StartRays start;
     
     /* Будем считать оси из центра экрана */
     float screen_x = x - screen_width / 2.0;
@@ -426,16 +391,7 @@ getStart (float x,
                             10.* screen_y/screen_width,
                             10.);
     start.dir   = normalize(start.point);
-    
-    /* Меняем направление, в зависимости от мышки */
-    //float mouse_x = iMouse.x - screen_width / 2.0;
-    //float mouse_y = iMouse.y - screen_height / 2.0;
-    
-    //Rotate rotate = getRotate (mouse_x, mouse_y, screen_width);
-    
-    //start.point = rotate.x * rotate.y * start.point;
-    //start.dir   = rotate.x * rotate.y * start.dir;
-    
+
     start.point = rotation_x_matrix * rotation_y_matrix * start.point;
     start.dir   = rotation_x_matrix * rotation_y_matrix * start.dir;
 
@@ -448,10 +404,10 @@ getStart (float x,
 void main()
 {
     ////////////////////////////////////////////////////////////
-	///                                                      ///
-	///            Положение фигур и источников света.       ///
-	///                                                      ///
-	////////////////////////////////////////////////////////////
+    ///                                                      ///
+    ///            Положение фигур и источников света.       ///
+    ///                                                      ///
+    ////////////////////////////////////////////////////////////
     
     figures[0].type   = FIG_SPHERE;
     float v0z  = 2.;
@@ -499,10 +455,10 @@ void main()
 
     
     ////////////////////////////////////////////////////////////
-	///                                                      ///
-	///                     Алгоритм.                        ///
-	///                                                      ///
-	////////////////////////////////////////////////////////////
+    ///                                                      ///
+    ///                     Алгоритм.                        ///
+    ///                                                      ///
+    ////////////////////////////////////////////////////////////
     
     StartRays start = getStart(gl_FragCoord.x, gl_FragCoord.y, iResolution.x, iResolution.y);
     vec3 ray_point = start.point;

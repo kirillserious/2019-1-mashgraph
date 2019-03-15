@@ -19,9 +19,11 @@ public:
 
 
         GLint get_uniform_location (const GLchar *variable);
-        void  set_uniform 		   (const GLchar *variable, GLfloat f);
-       	void  set_uniform 		   (const GLchar *variable, GLfloat f1, GLfloat f2);
+        void  set_uniform          (const GLchar *variable, GLfloat f);
+       	void  set_uniform          (const GLchar *variable, GLfloat f1, GLfloat f2);
        	void  set_uniform          (const GLchar *variable, GLfloat f1, GLfloat f2, GLfloat f3, GLfloat f4);
+
+        void  set_uniform_matrix   (const GLchar *variable, const GLfloat *matrix, int shape);
 };
 
 #endif

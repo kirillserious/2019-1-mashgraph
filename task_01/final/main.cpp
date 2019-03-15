@@ -7,7 +7,15 @@
 #include "shader.h"
 
 int screen_width, screen_height;
-float mouse_x, mouse_y;
+
+GLfloat rotation_x_matrix[] = {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f };
+GLfloat rotation_y_matrix[] = {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f };
 
 void
 key_callback(GLFWwindow *window,
@@ -35,8 +43,28 @@ window_resize_callback (GLFWwindow* window,
 void
 cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-        mouse_x = xpos;
-        mouse_y = screen_width - ypos;
+        float eye_dist = screen_width;
+        
+        float x =  xpos - screen_width/2;
+        float y = -ypos + screen_width/2;
+        
+        float y_hypotenuse = sqrt(x*x + eye_dist*eye_dist);
+        float y_cos = eye_dist / y_hypotenuse;;
+        float y_sin = - x / y_hypotenuse;
+        
+        rotation_y_matrix[0] =  y_cos;
+        rotation_y_matrix[2] =  y_sin;
+        rotation_y_matrix[6] = -y_sin;
+        rotation_y_matrix[8] =  y_cos;
+    
+        float x_hypotenuse = sqrt(y*y + eye_dist*eye_dist);
+        float x_cos = eye_dist / x_hypotenuse;;
+        float x_sin = y / x_hypotenuse;
+
+        rotation_x_matrix[4] =  x_cos;
+        rotation_x_matrix[7] =  x_sin;
+        rotation_x_matrix[5] = -x_sin;
+        rotation_x_matrix[8] =  x_cos;
 }
 
 GLuint
@@ -118,15 +146,17 @@ main(int argc, char** argv)
         /* Обработчики событий */
         glfwSetKeyCallback        (window, key_callback);
         glfwSetWindowSizeCallback (window, window_resize_callback);
-        glfwSetCursorPosCallback(window, cursor_position_callback);
+        glfwSetCursorPosCallback  (window, cursor_position_callback);
         
         /* Игровой цикл */
         while(!glfwWindowShouldClose(window)) {
                 glfwPollEvents();
 
+                /* Передача параметров */
                 myShader.set_uniform("iResolution", screen_width, screen_height);
                 myShader.set_uniform("iTime", glfwGetTime());
-                myShader.set_uniform("iMouse", mouse_x, mouse_y);
+                myShader.set_uniform_matrix("rotation_x_matrix", rotation_x_matrix, 3);
+                myShader.set_uniform_matrix("rotation_y_matrix", rotation_y_matrix, 3);
                 myShader.use();
 
                 glBindVertexArray(VAO);

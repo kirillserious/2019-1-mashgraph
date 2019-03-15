@@ -109,3 +109,21 @@ Shader :: set_uniform (const GLchar *variable, GLfloat f)
     GLint location = get_uniform_location(variable);
     glUniform1f(location, f);
 }
+
+void
+Shader :: set_uniform_matrix (const GLchar *variable, const GLfloat *matrix, int shape)
+{
+        GLint location = get_uniform_location(variable);
+        switch (shape) {
+        case 2:
+                glUniformMatrix2fv(location, 1, GL_FALSE, matrix);
+                break;        
+        case 3:
+                glUniformMatrix3fv(location, 1, GL_FALSE, matrix);
+                break;
+        case 4:
+                glUniformMatrix4fv(location, 1, GL_FALSE, matrix);
+                break;
+        }
+}
+

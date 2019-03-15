@@ -6,6 +6,9 @@ uniform vec2  iResolution;
 uniform float iTime;
 uniform vec2  iMouse;
 
+uniform mat3  rotation_x_matrix;
+uniform mat3  rotation_y_matrix;
+
 ///////////////////////////////////////////////////////////////
 ///                                                         ///
 ///                   Важные константы                      ///
@@ -425,14 +428,17 @@ getStart (float x,
     start.dir   = normalize(start.point);
     
     /* Меняем направление, в зависимости от мышки */
-    float mouse_x = iMouse.x - screen_width / 2.0;
-    float mouse_y = iMouse.y - screen_height / 2.0;
+    //float mouse_x = iMouse.x - screen_width / 2.0;
+    //float mouse_y = iMouse.y - screen_height / 2.0;
     
-    Rotate rotate = getRotate (mouse_x, mouse_y, screen_width);
+    //Rotate rotate = getRotate (mouse_x, mouse_y, screen_width);
     
-    start.point = rotate.x * rotate.y * start.point;
-    start.dir   = rotate.x * rotate.y * start.dir;
+    //start.point = rotate.x * rotate.y * start.point;
+    //start.dir   = rotate.x * rotate.y * start.dir;
     
+    start.point = rotation_x_matrix * rotation_y_matrix * start.point;
+    start.dir   = rotation_x_matrix * rotation_y_matrix * start.dir;
+
     start.eye_point  = vec3(0., 0., 0.);
     
     return start;

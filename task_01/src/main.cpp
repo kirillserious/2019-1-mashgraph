@@ -17,6 +17,7 @@ GLfloat rotation_y_matrix[] = {
         0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f };
 
+/* Callback functions */
 void
 key_callback(GLFWwindow *window,
                     int key, 
@@ -30,9 +31,9 @@ key_callback(GLFWwindow *window,
 }
 
 void
-window_resize_callback (GLFWwindow* window,
-                        int width,
-                        int height)
+window_resize_callback (GLFWwindow *window,
+                               int width,
+                               int height)
 {
         screen_width  = width;
         screen_height = height;
@@ -41,7 +42,9 @@ window_resize_callback (GLFWwindow* window,
 }
 
 void
-cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+cursor_position_callback (GLFWwindow *window,
+                              double xpos,
+                              double ypos)
 {
         float eye_dist = screen_width;
         
@@ -140,7 +143,13 @@ main(int argc, char** argv)
         glfwGetFramebufferSize(window, &screen_width, &screen_height);
         glViewport(0, 0, screen_width, screen_height);
 
-        Shader myShader("shaders/shader.vs", "shaders/shader.frag");
+        /* Путь к файлам */
+        std::string base_path(argv[0]);
+        base_path = base_path.substr(0, base_path.find_last_of("/") + 1);
+        std::string vertex_path(base_path + "shaders/shader.vs");
+        std::string fragment_path(base_path + "shaders/shader.frag");
+
+        Shader myShader(vertex_path.c_str(), fragment_path.c_str());
         GLuint VAO = get_vertex_array_object();
 
         /* Обработчики событий */

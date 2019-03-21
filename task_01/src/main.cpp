@@ -4,9 +4,15 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "shader.h"
+#include "camera.h"
 
 int screen_width, screen_height;
+
+Camera camera;
 
 GLfloat rotation_x_matrix[] = {
         1.0f, 0.0f, 0.0f,
@@ -18,18 +24,6 @@ GLfloat rotation_y_matrix[] = {
         0.0f, 0.0f, 1.0f };
 
 /* Callback functions */
-void
-key_callback(GLFWwindow *window,
-                    int key, 
-                    int scancode, 
-                    int action,
-                    int mode)
-{
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-                glfwSetWindowShouldClose(window, GL_TRUE);
-        }
-}
-
 void
 window_resize_callback (GLFWwindow *window,
                                int width,
@@ -46,38 +40,65 @@ cursor_position_callback (GLFWwindow *window,
                               double xpos,
                               double ypos)
 {
-        float eye_dist = screen_width;
-        
-        float x =  xpos - screen_width/2;
-        float y = -ypos + screen_width/2;
-        
-        float y_hypotenuse = sqrt(x*x + eye_dist*eye_dist);
-        float y_cos = eye_dist / y_hypotenuse;;
-        float y_sin = - x / y_hypotenuse;
-        
-        rotation_y_matrix[0] =  y_cos;
-        rotation_y_matrix[2] =  y_sin;
-        rotation_y_matrix[6] = -y_sin;
-        rotation_y_matrix[8] =  y_cos;
-    
-        float x_hypotenuse = sqrt(y*y + eye_dist*eye_dist);
-        float x_cos = eye_dist / x_hypotenuse;;
-        float x_sin = y / x_hypotenuse;
+        static GLfloat lastX = 400, lastY = 300;  // Типа центр экрана
 
-        rotation_x_matrix[4] =  x_cos;
-        rotation_x_matrix[7] =  x_sin;
-        rotation_x_matrix[5] = -x_sin;
-        rotation_x_matrix[8] =  x_cos;
+        static bool firstMouse = true;        
+        if (firstMouse) // эта переменная была проинициализирована значением true
+        {
+                lastX = xpos;
+                lastY = ypos;
+                firstMouse = false;
+        }
+        GLfloat xoffset = xpos - lastX;
+        GLfloat yoffset = lastY - ypos; // Обратный порядок вычитания потому что оконные Y-координаты возрастают с верху вниз 
+        lastX = xpos;
+        lastY = ypos;
+
+        camera.process_mouse_movement(xoffset, yoffset);
+}
+
+GLfloat deltaTime = 0.0f;    // Время, прошедшее между последним и текущим кадром
+bool keys[1024];
+
+void
+do_movement()
+{
+  // Camera controls
+  if(keys[GLFW_KEY_W])
+        camera.ProcessKeyboard(MOV_FORWARD, deltaTime);
+  if(keys[GLFW_KEY_S])
+        camera.ProcessKeyboard(MOV_BACKWARD, deltaTime);
+  if(keys[GLFW_KEY_A])
+        camera.ProcessKeyboard(MOV_LEFT, deltaTime);
+  if(keys[GLFW_KEY_D])
+        camera.ProcessKeyboard(MOV_RIGHT, deltaTime);
+}
+
+void
+key_callback(GLFWwindow *window,
+                    int key, 
+                    int scancode, 
+                    int action,
+                    int mode)
+{
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+                glfwSetWindowShouldClose(window, GL_TRUE);
+        }
+
+        if(action == GLFW_PRESS)
+                keys[key] = true;
+        else if(action == GLFW_RELEASE)
+                keys[key] = false;
 }
 
 GLuint
 get_vertex_array_object (void) {
     GLfloat vertices[] = {
-        // Позиции          // Цвета
+        // Позиции
          1.0f,  1.0f, 0.0f,   // Верхний правый угол
-         1.0f, -1.0f, 0.0f,   // Нижний правый угол
-        -1.0f, -1.0f, 0.0f,   // Нижний левый угол
-        -1.0f,  1.0f, 0.0f,   // Верхний левый угол
+         1.0f, -1.0f, 0.0f,   // Нижний  правый угол
+        -1.0f, -1.0f, 0.0f,   // Нижний  левый  угол
+        -1.0f,  1.0f, 0.0f,   // Верхний левый  угол
         };
         
     GLuint indices[] = {  // Помните, что мы начинаем с 0!
@@ -147,7 +168,7 @@ main(int argc, char** argv)
         std::string base_path(argv[0]);
         base_path = base_path.substr(0, base_path.find_last_of("/") + 1);
         std::string vertex_path(base_path + "shaders/shader.vs");
-        std::string fragment_path(base_path + "shaders/shader.frag");
+        std::string fragment_path(base_path + "shaders/shader.fs");
 
         Shader myShader(vertex_path.c_str(), fragment_path.c_str());
         GLuint VAO = get_vertex_array_object();
@@ -158,14 +179,17 @@ main(int argc, char** argv)
         glfwSetCursorPosCallback  (window, cursor_position_callback);
         
         /* Игровой цикл */
+        GLfloat lastFrame = 0.0f;
         while(!glfwWindowShouldClose(window)) {
                 glfwPollEvents();
+                do_movement();
 
                 /* Передача параметров */
                 myShader.set_uniform("iResolution", screen_width, screen_height);
                 myShader.set_uniform("iTime", glfwGetTime());
-                myShader.set_uniform_matrix("rotation_x_matrix", rotation_x_matrix, 3);
-                myShader.set_uniform_matrix("rotation_y_matrix", rotation_y_matrix, 3);
+                myShader.set_uniform_vector("camera_position", glm::value_ptr(camera.get_position()), 3);
+                myShader.set_uniform_matrix("transform_matrix", glm::value_ptr(camera.get_transform()), 4);
+
                 myShader.use();
 
                 glBindVertexArray(VAO);
@@ -175,6 +199,11 @@ main(int argc, char** argv)
                 glBindVertexArray(0);
 
                 glfwSwapBuffers(window);
+
+                /* Меняем время */
+                GLfloat currentFrame = glfwGetTime();
+                deltaTime = currentFrame - lastFrame;
+                lastFrame = currentFrame;
         }
 
 

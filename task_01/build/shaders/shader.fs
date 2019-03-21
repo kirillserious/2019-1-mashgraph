@@ -5,8 +5,9 @@ out vec4 fragColor;
 uniform vec2  iResolution;
 uniform float iTime;
 
-uniform mat3  rotation_x_matrix;
-uniform mat3  rotation_y_matrix;
+uniform vec3  camera_position;
+uniform mat4  transform_matrix;
+
 
 ///////////////////////////////////////////////////////////////
 ///                                                         ///
@@ -392,10 +393,10 @@ getStart (float x,
                             10.);
     start.dir   = normalize(start.point);
 
-    start.point = rotation_x_matrix * rotation_y_matrix * start.point;
-    start.dir   = rotation_x_matrix * rotation_y_matrix * start.dir;
+    start.point = (transform_matrix * vec4(start.point, 1.0)).xyz + camera_position;
+    start.dir   = (transform_matrix * vec4(start.dir, 1.0)).xyz;
 
-    start.eye_point  = vec3(0., 0., 0.);
+    start.eye_point  = camera_position;
     
     return start;
 }

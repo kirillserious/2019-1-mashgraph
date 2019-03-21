@@ -111,6 +111,25 @@ Shader :: set_uniform (const GLchar *variable, GLfloat f)
 }
 
 void
+Shader :: set_uniform_vector (const GLchar *variable, const GLfloat *vector, int shape)
+{
+        GLint location = get_uniform_location(variable);
+        switch (shape) {
+        case 1: 
+                glUniform1fv(location, 1, vector);
+        case 2:
+                glUniform2fv(location, 1, vector);
+                break;        
+        case 3:
+                glUniform3fv(location, 1, vector);
+                break;
+        case 4:
+                glUniform4fv(location, 1, vector);
+                break;
+        }
+}
+
+void
 Shader :: set_uniform_matrix (const GLchar *variable, const GLfloat *matrix, int shape)
 {
         GLint location = get_uniform_location(variable);

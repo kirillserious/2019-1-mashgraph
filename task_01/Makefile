@@ -4,7 +4,7 @@ CFLAGS=-c -std=c++11 -Wall
 LDFLAGS=-lglfw -lGLEW -lGL -lm
 
 # Исходный код
-SOURCES=src/main.cpp src/shader.cpp
+SOURCES=src/main.cpp src/shader.cpp src/camera.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 
 # Папка с шейдерами

@@ -23,7 +23,9 @@ public:
        	void  set_uniform          (const GLchar *variable, GLfloat f1, GLfloat f2);
        	void  set_uniform          (const GLchar *variable, GLfloat f1, GLfloat f2, GLfloat f3, GLfloat f4);
 
+        void  set_uniform_vector   (const GLchar *variable, const GLfloat *vector, int shape);
         void  set_uniform_matrix   (const GLchar *variable, const GLfloat *matrix, int shape);
+
 };
 
 #endif
